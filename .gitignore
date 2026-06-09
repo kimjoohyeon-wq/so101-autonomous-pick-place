@@ -12,6 +12,9 @@ logs/camera_recordings/
 *.mp4
 *.avi
 
+# Demo exceptions
+!docs/demo.mp4
+
 # Datasets (separate repo)
 datasets/
 

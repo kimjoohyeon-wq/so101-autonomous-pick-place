@@ -34,6 +34,16 @@ VLM / GPT (2~3초)         → 공간 추론 + 복구 계획 생성
 | VLM 호출 비율 | 7.1% (전환점/이상 상황만) |
 | 복구 루프 테스트 | ✅ Gemini 2.5 Flash 연동 완료 |
 
+## 데모
+
+**CV 게이트 + 상태 머신 실시간 pick-and-place 모니터링:**
+
+![Demo](docs/demo.mp4)
+
+- 🟢 초록 바 = HELD (컵 파지) / 🔴 빨간 바 = NOT_HELD
+- 🟡 노란 윤곽 = orange 마커 검출 / 🔵 파란 윤곽 = blue 마커 검출
+- 55프레임, 0 anomaly, 정상 pick-and-place 사이클
+
 ## 시스템 구성
 
 ```
