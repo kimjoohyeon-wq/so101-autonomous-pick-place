@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Robot recordings (large files)
+logs/camera_recordings/
+*.mp4
+*.avi
+
+# Datasets (separate repo)
+datasets/
+
+# API keys
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Reports (auto-generated)
+reports/*.json
+!reports/.gitkeep
