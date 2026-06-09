@@ -1,0 +1,9 @@
+# Core dependencies for SO-101 Autonomous Pick-and-Place
+numpy>=1.24
+opencv-python>=4.8
+requests>=2.31
+
+# Optional: local GPU VLM inference
+# torch>=2.1
+# transformers>=4.36
+# accelerate>=0.25

@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Lint](https://github.com/kimjoohyeon-wq/so101-autonomous-pick-place/actions/workflows/lint.yml/badge.svg)](https://github.com/kimjoohyeon-wq/so101-autonomous-pick-place/actions/workflows/lint.yml)
 
 SO-101 로봇 팔을 위한 **CV + VLM 하이브리드 비전 파이프라인**.  
 Classical CV로 92.9%를 0.01초 처리하고, 모호한 케이스만 VLM에 위임하는 2단계 cascade 아키텍처.
@@ -45,6 +46,14 @@ VLM / GPT (2~3초)         → 공간 추론 + 복구 계획 생성
 │   └── codex_oss_application_draft.md
 ├── reports/
 └── logs/
+```
+
+## 설치
+
+```bash
+git clone https://github.com/kimjoohyeon-wq/so101-autonomous-pick-place.git
+cd so101-autonomous-pick-place
+pip install -r requirements.txt
 ```
 
 ## 빠른 시작
