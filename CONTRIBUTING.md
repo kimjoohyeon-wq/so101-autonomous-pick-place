@@ -1,8 +1,10 @@
 # Contributing to SO-101 Autonomous Pick-and-Place
 
-환영합니다! 이 프로젝트는 실제 로봇 하드웨어에서 검증된 AI 비전 파이프라인을 오픈소스로 제공합니다.
+Welcome! This project provides an AI vision pipeline validated on real robot hardware as open source.
 
-## 시작하기
+[한글 가이드](#한국어)
+
+## Getting Started
 
 ```bash
 git clone https://github.com/kimjoohyeon-wq/so101-autonomous-pick-place.git
@@ -10,24 +12,52 @@ cd so101-autonomous-pick-place
 pip install -r requirements.txt
 ```
 
-## 작동 방식
+## How It Works
+
+1. **CV Gate** — HSV blob detection determines cup grasp state in 0.01s
+2. **VLM Cascade** — Only ambiguous cases escalate to VLM (currently Gemini 2.5 Flash, planned Codex GPT-5)
+3. **Autonomous Recovery Loop** — Anomaly detection → VLM analysis → recovery plan generation
+
+## How to Contribute
+
+1. Open an issue: bug reports, feature requests, and questions are all welcome
+2. Submit a PR: small PRs preferred. For large changes, discuss in an issue first
+3. Code style: must pass `flake8` or `ruff` lint
+
+## Safety Notes
+
+This code controls real robot hardware. When submitting a PR:
+- Clearly flag any change that affects physical safety
+- Test new behaviors in simulation / dry-run first
+
+## License
+
+MIT — contributed code is also provided under MIT.
+
+---
+
+## 한국어
+
+환영합니다! 이 프로젝트는 실제 로봇 하드웨어에서 검증된 AI 비전 파이프라인을 오픈소스로 제공합니다.
+
+### 작동 방식
 
 1. **CV 게이트** — HSV 블롭 검출로 0.01초 만에 컵 파지 상태 판정
 2. **VLM 캐스케이드** — 모호한 케이스만 VLM에 위임 (현재 Gemini 2.5 Flash, 향후 Codex GPT-5)
 3. **자율 복구 루프** — 이상 감지 → VLM 분석 → 복구 계획 생성
 
-## 기여 방법
+### 기여 방법
 
 1. 이슈 생성: 버그 리포트, 기능 제안, 질문 모두 환영
 2. PR 제출: 작은 PR이 더 좋습니다. 큰 변경은 먼저 이슈로 논의해주세요
 3. 코드 스타일: `flake8` 또는 `ruff` 린트 통과 필수
 
-## 안전 주의사항
+### 안전 주의사항
 
 이 코드는 실제 로봇 하드웨어를 제어할 수 있습니다. PR 제출 시:
 - 물리적 안전에 영향을 주는 변경은 반드시 명시
 - 새로운 동작은 시뮬레이션/드라이런으로 먼저 테스트
 
-## 라이선스
+### 라이선스
 
 MIT — 기여한 코드도 MIT로 제공됩니다.

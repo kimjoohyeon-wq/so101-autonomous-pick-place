@@ -4,113 +4,107 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Lint](https://github.com/kimjoohyeon-wq/so101-autonomous-pick-place/actions/workflows/lint.yml/badge.svg)](https://github.com/kimjoohyeon-wq/so101-autonomous-pick-place/actions/workflows/lint.yml)
 
-SO-101 로봇 팔을 위한 **CV + VLM 하이브리드 비전 파이프라인**.  
-Classical CV로 92.9%를 0.01초 처리하고, 모호한 케이스만 VLM에 위임하는 2단계 cascade 아키텍처.
+A **CV + VLM hybrid vision pipeline** for the SO-101 robot arm.  
+Classical CV handles 92.9% of frames in **0.01 seconds**; ambiguous cases cascade to a VLM for spatial reasoning and recovery planning.
 
-> 🎯 **목표:** 퇴근 후 무인 자율 pick-and-place + 컵 넘어짐/이탈 시 스스로 복구
+> 🎯 **Goal:** Lights-out autonomous pick-and-place with self-recovery on cup drops and anomalies.
+
+[한국어 README](README.ko.md)
 
 ---
 
-## 핵심 아이디어
+## Core Idea
 
 ```
-CV Gate (0.01초)          → 자신 있는 케이스 즉시 판정
-    ↓ (7.1% 모호한 케이스만)
-VLM / GPT (2~3초)         → 공간 추론 + 복구 계획 생성
+CV Gate (0.01s)           → confident cases decided immediately
+    ↓ (7.1% ambiguous only)
+VLM / GPT (2–3s)          → spatial reasoning + recovery plan generation
 ```
 
-**왜 이 방식인가?**
-- NVIDIA LiteVLM(2025)과 같은 철학: "싼 필터로 거르고, 비싼 모델은 꼭 필요할 때만"
-- CV는 결정론적이고 검증 가능 → 물리적 안전 보장
-- VLM은 유연한 공간 추론 → 예외 상황 대응
+**Why this architecture?**
+- Same philosophy as NVIDIA LiteVLM (2025): "cheap filter first, expensive model only when needed"
+- CV is deterministic and verifiable → guarantees physical safety
+- VLM provides flexible spatial reasoning → handles edge cases
 
-## 성능
+## Performance
 
-| 지표 | 결과 |
-|------|------|
-| CV 게이트 정확도 | **100%** (24장 검증) |
-| CV 커버리지 | 92.9% (224프레임 신규 검증) |
-| CV 처리 속도 | **0.01초** / 프레임 |
-| VLM 호출 비율 | 7.1% (전환점/이상 상황만) |
-| 복구 루프 테스트 | ✅ Gemini 2.5 Flash 연동 완료 |
+| Metric | Result |
+|--------|--------|
+| CV Gate accuracy | **100%** (24-frame validation) |
+| CV coverage | 92.9% (224-frame held-out test) |
+| CV inference speed | **0.01s** / frame |
+| VLM invocation rate | 7.1% (transition points & anomalies only) |
+| Recovery loop | ✅ Gemini 2.5 Flash integrated |
 
-## 데모
+## Demo
 
-**CV 게이트 + 상태 머신 실시간 pick-and-place 모니터링:**
+**CV Gate + state machine real-time pick-and-place monitoring:**
 
 ![Demo](docs/demo.mp4)
 
-- 🟢 초록 바 = HELD (컵 파지) / 🔴 빨간 바 = NOT_HELD
-- 🟡 노란 윤곽 = orange 마커 검출 / 🔵 파란 윤곽 = blue 마커 검출
-- 55프레임, 0 anomaly, 정상 pick-and-place 사이클
+- 🟢 Green bar = HELD (cup grasped) / 🔴 Red bar = NOT_HELD
+- 🟡 Yellow contour = orange marker detected / 🔵 Blue contour = blue marker detected
+- 55 frames, 0 anomalies, normal pick-and-place cycle
 
-## 시스템 구성
+## System Overview
 
 ```
 📁 so101-autonomous-pick-place/
 ├── scripts/
-│   ├── aux_hybrid_detector.py    # CV+VLM 하이브리드 검출기
-│   └── autonomous_recovery_loop.py # 자율 복구 루프
-├── bridge/                        # Codex ↔ Hermes 협업 브릿지
+│   ├── aux_hybrid_detector.py       # CV+VLM hybrid detector
+│   └── autonomous_recovery_loop.py  # Autonomous recovery loop
+├── bridge/                          # Codex ↔ Hermes collaboration bridge
 ├── docs/
 │   └── codex_oss_application_draft.md
 ├── reports/
 └── logs/
 ```
 
-## 설치
+## Quick Start
 
-```bash
-git clone https://github.com/kimjoohyeon-wq/so101-autonomous-pick-place.git
-cd so101-autonomous-pick-place
-pip install -r requirements.txt
-```
-
-## 빠른 시작
-
-### 1. CV 게이트 검출기
+### 1. CV Gate Detector
 
 ```bash
 python scripts/aux_hybrid_detector.py --image cup_scene.jpg
 # → HELD | cv_held | orange=5230 blue=8198
 ```
 
-### 2. 자율 복구 루프
+### 2. Autonomous Recovery Loop
 
 ```bash
 python scripts/autonomous_recovery_loop.py
 # CV gate monitors → anomaly detected → Gemini analyzes → recovery plan
 ```
 
-### 요구사항
+### Requirements
 - Python 3.10+
 - OpenCV, NumPy, requests
-- (선택) 로컬 GPU + Qwen2-VL 서버
-- (선택) OpenRouter API 키 (Gemini 2.5 Flash)
+- (Optional) Local GPU + Qwen2-VL server
+- (Optional) OpenRouter API key (Gemini 2.5 Flash)
 
-## 기술 스택
+## Tech Stack
 
-| 계층 | 기술 |
-|------|------|
-| CV Gate | OpenCV, HSV 블롭 검출 |
-| 로컬 VLM | Qwen2-VL-2B (transformers, RTX 3080) |
-| 클라우드 VLM | Gemini 2.5 Flash / GPT-5 (Codex) |
-| 로봇 제어 | SO-101 (LeRobot 호환) |
-| 상태 머신 | Python 기반 이벤트 드리븐 |
+| Layer | Technology |
+|-------|------------|
+| CV Gate | OpenCV, HSV blob detection |
+| Local VLM | Qwen2-VL-2B (transformers, RTX 3080) |
+| Cloud VLM | Gemini 2.5 Flash / GPT-5 (Codex) |
+| Robot Control | SO-101 (LeRobot-compatible) |
+| State Machine | Python event-driven |
 
-## 로드맵
+## Roadmap
 
-- [x] CV 게이트 100% 정확도
-- [x] 224프레임 신규 검증
-- [x] 자율 복구 루프 프로토타입
-- [ ] Codex GPT-5 vision 통합
-- [ ] 실시간 로봇 제어 파이프라인
-- [ ] YOLO 학습 데이터셋 공개
-- [ ] 다중 로봇 플랫폼 지원
+- [x] CV Gate 100% accuracy
+- [x] 224-frame held-out validation
+- [x] Autonomous recovery loop prototype
+- [ ] Codex GPT-5 vision integration
+- [ ] Real-time robot control pipeline
+- [ ] YOLO training dataset release
+- [ ] Multi-robot platform support
 
-## 라이선스
+## License
 
-MIT License — 상업적 사용, 수정, 배포 자유롭게 가능.
+MIT License — free for commercial use, modification, and redistribution.
 
 ---
 
