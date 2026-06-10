@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """
 Autonomous Pick-and-Place Monitor with Recovery Loop v2
 =======================================================

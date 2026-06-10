@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """Hybrid aux hold detector: CV gate (orange/blue blob) + local GPU Qwen2-VL.
 
 Offline-only: reads images, calls local GPU server. Never opens cameras/COM ports.
