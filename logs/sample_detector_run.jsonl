@@ -1,0 +1,12 @@
+{"frame":1,"orange_blob":5812,"blue_blob":15234,"verdict":"HELD","method":"cv_held","time_ms":9}
+{"frame":2,"orange_blob":5798,"blue_blob":15102,"verdict":"HELD","method":"cv_held","time_ms":8}
+{"frame":3,"orange_blob":5834,"blue_blob":14876,"verdict":"HELD","method":"cv_held","time_ms":9}
+{"frame":4,"orange_blob":112,"blue_blob":2890,"verdict":"NOT_HELD","method":"cv_not_held","time_ms":8}
+{"frame":5,"orange_blob":89,"blue_blob":1402,"verdict":"NOT_HELD","method":"cv_not_held","time_ms":8}
+{"frame":6,"orange_blob":542,"blue_blob":4203,"verdict":"NOT_HELD","method":"cv_not_held","time_ms":9}
+{"frame":7,"orange_blob":4870,"blue_blob":14123,"verdict":"HELD","method":"cv_held","time_ms":8}
+{"frame":8,"orange_blob":4912,"blue_blob":14001,"verdict":"HELD","method":"cv_held","time_ms":9}
+{"frame":9,"orange_blob":4887,"blue_blob":13972,"verdict":"HELD","method":"cv_held","time_ms":8}
+{"frame":10,"orange_blob":378,"blue_blob":6201,"verdict":"HELD","method":"qwen","time_ms":2134}
+{"frame":11,"orange_blob":4923,"blue_blob":14208,"verdict":"HELD","method":"cv_held","time_ms":9}
+{"frame":12,"orange_blob":4901,"blue_blob":13988,"verdict":"HELD","method":"cv_held","time_ms":8}

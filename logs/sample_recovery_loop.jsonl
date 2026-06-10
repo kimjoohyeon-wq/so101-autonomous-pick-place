@@ -1,0 +1,12 @@
+{"ts":"2026-06-08T17:57:20","state":"HELD","frames_in_state":4,"anomaly":false}
+{"ts":"2026-06-08T17:57:21","state":"HELD","frames_in_state":5,"anomaly":false}
+{"ts":"2026-06-08T17:57:22","state":"NOT_HELD","frames_in_state":0,"anomaly":false,"transition":"HELD→NOT_HELD"}
+{"ts":"2026-06-08T17:57:23","state":"NOT_HELD","frames_in_state":1,"anomaly":false}
+{"ts":"2026-06-08T17:57:24","state":"NOT_HELD","frames_in_state":2,"anomaly":false}
+{"ts":"2026-06-08T17:57:25","state":"NOT_HELD","frames_in_state":3,"anomaly":false}
+{"ts":"2026-06-08T17:57:26","state":"UNCERTAIN","frames_in_state":0,"anomaly":false}
+{"ts":"2026-06-08T17:57:27","state":"UNCERTAIN","frames_in_state":1,"anomaly":false}
+{"ts":"2026-06-08T17:57:28","state":"UNCERTAIN","frames_in_state":2,"anomaly":false}
+{"ts":"2026-06-08T17:57:29","state":"UNCERTAIN","frames_in_state":3,"anomaly":false}
+{"ts":"2026-06-08T17:57:30","state":"UNCERTAIN","frames_in_state":4,"anomaly":true,"anomaly_type":"uncertainty_timeout","recovery":"gemini_triggered"}
+{"ts":"2026-06-08T17:57:32","state":"RECOVERY","recovery_plan":"check camera view, verify cup position, retry approach","gemini_response":"The cup appears to be near the edge of the gripper. Recommend: lift slightly, re-center, then attempt grasp again.","time_ms":2134}
