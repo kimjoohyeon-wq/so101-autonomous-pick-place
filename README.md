@@ -4,10 +4,12 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Lint](https://github.com/kimjoohyeon-wq/so101-autonomous-pick-place/actions/workflows/lint.yml/badge.svg)](https://github.com/kimjoohyeon-wq/so101-autonomous-pick-place/actions/workflows/lint.yml)
 
-A **CV + VLM hybrid vision pipeline** for the SO-101 robot arm.  
+A **CV + VLM hybrid vision pipeline** for autonomous pick-and-place on a low-cost SO-101 robot arm.  
 Classical CV handles 92.9% of frames in **0.01 seconds**; ambiguous cases cascade to a VLM for spatial reasoning and recovery planning.
 
 > 🎯 **Goal:** Lights-out autonomous pick-and-place with self-recovery on cup drops and anomalies.
+>
+> ⚠️ **Fair warning:** Built by a manufacturer with no formal robotics background. I'm learning in public. If something looks wrong, please tell me — that's why this is open source.
 
 [한국어 README](README.ko.md)
 
@@ -101,6 +103,13 @@ python scripts/autonomous_recovery_loop.py
 - [ ] Real-time robot control pipeline
 - [ ] YOLO training dataset release
 - [ ] Multi-robot platform support
+
+## What I Need Help With
+
+- **Logic flow sanity check** — does this CV+VLM cascade architecture make sense for real-world pick-and-place?
+- **State machine robustness** — what am I missing for production-grade reliability?
+- **Obvious pitfalls** — things a non-roboticist wouldn't think of
+- **General feedback** — blunt, honest, appreciated. I'm here to learn.
 
 ## License
 
