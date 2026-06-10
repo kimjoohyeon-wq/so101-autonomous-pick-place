@@ -1,14 +1,15 @@
-name: Lint
+name: Lint & Test
 
 on: [push, pull_request]
 
 jobs:
-  lint:
+  lint-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install ruff
+      - run: pip install ruff pytest numpy opencv-python
       - run: ruff check scripts/ --ignore E501
+      - run: python -m pytest tests/ -v

@@ -16,7 +16,7 @@ pip install -r requirements.txt
 
 1. **CV Gate** — HSV blob detection determines cup grasp state in 0.01s
 2. **VLM Cascade** — Only ambiguous cases escalate to VLM (currently Gemini 2.5 Flash, planned Codex GPT-5)
-3. **Autonomous Recovery Loop** — Anomaly detection → VLM analysis → recovery plan generation
+3. **Autonomous Recovery Loop** — Anomaly detection → VLM analysis → recovery plan **text generation** (execution layer TODO)
 
 ## How to Contribute
 
@@ -44,7 +44,7 @@ MIT — contributed code is also provided under MIT.
 
 1. **CV 게이트** — HSV 블롭 검출로 0.01초 만에 컵 파지 상태 판정
 2. **VLM 캐스케이드** — 모호한 케이스만 VLM에 위임 (현재 Gemini 2.5 Flash, 향후 Codex GPT-5)
-3. **자율 복구 루프** — 이상 감지 → VLM 분석 → 복구 계획 생성
+3. **자율 복구 루프** — 이상 감지 → VLM 분석 → 복구 계획 **텍스트 생성** (실행부 TODO)
 
 ### 기여 방법
 

@@ -1,0 +1,1 @@
+{"timestamp": "YYYY-MM-DDTHH:MM:SS+09:00", "run_type": "physical|camera|data-collection", "result": "success|failure|partial", "robot_motion": false, "com_ports": [], "camera_devices": [], "gripper_action": false, "user_approved": false, "observations": "", "artifacts": []}
