@@ -29,6 +29,12 @@ wrist_roll:   -9.89    gripper:      44.73
 - **ArUco Markers Detected:** 4/4 (ids: 0,1,3,4)
 - **Selection:** auto, highest mapped count
 
+## Visual Reference
+
+| Pre-Pickup (cup in green zone) | Post-Pickup (cup in gripper) |
+|--------------------------------|------------------------------|
+| ![Pre](sample_held_cup_in_gripper.jpg) | ![Post](sample_post_pickup.jpg) |
+
 ## Issue: Transport Drop
 
 The cup was successfully grasped (grip=-15, pos reaching ~29) and lifted from the green zone, but was dropped during the forward trajectory between frames 22-31 and 58-63. This is consistent across all replay attempts regardless of grip offset.
