@@ -14,11 +14,17 @@ Pipeline (CV-confident fast path, Qwen only for genuinely ambiguous):
 """
 from __future__ import annotations
 
-import argparse, base64, csv, json, os, sys, time
+import argparse
+import base64
+import csv
+import json
+import os
 from datetime import datetime
 from pathlib import Path
 
-import cv2, numpy as np, requests
+import cv2
+import numpy as np
+import requests
 
 API = "http://127.0.0.1:8081/v1/chat/completions"
 ORANGE_LOWER = np.array([10, 100, 100])
@@ -36,15 +42,12 @@ QWEN_PROMPT = (
     "Answer with exactly one word: HELD or NOT_HELD."
 )
 
-ROOT = Path(__file__).resolve().parents[1]
-
-
 def largest_blob(mask):
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     return max([cv2.contourArea(c) for c in contours]) if contours else 0
 
 
-def detect(img_path):
+def detect(img_path, api_url=API):
     """Return (verdict, method, orange_blob, blue_blob, qwen_raw)."""
     # Windows -> WSL path
     if img_path.startswith("C:") and not os.path.exists(img_path):
@@ -71,16 +74,23 @@ def detect(img_path):
     # Truly ambiguous — ask Qwen
     with open(img_path, "rb") as f:
         img_b64 = base64.b64encode(f.read()).decode()
-    resp = requests.post(API, json={
-        "messages": [{
-            "role": "user",
-            "content": [
-                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_b64}"}},
-                {"type": "text", "text": QWEN_PROMPT}
-            ]
-        }],
-        "max_tokens": 10, "temperature": 0.0
-    }, timeout=30)
+    resp = requests.post(
+        api_url,
+        json={
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_b64}"}},
+                        {"type": "text", "text": QWEN_PROMPT},
+                    ],
+                }
+            ],
+            "max_tokens": 10,
+            "temperature": 0.0,
+        },
+        timeout=30,
+    )
     raw = resp.json()["choices"][0]["message"]["content"].strip().upper()
     if "NOT" in raw:
         verdict = "NOT_HELD"
@@ -91,7 +101,7 @@ def detect(img_path):
     return (verdict, "qwen", orange_blob, blue_blob, raw)
 
 
-def batch_from_csv(csv_path, out_path=None):
+def batch_from_csv(csv_path, out_path=None, api_url=API):
     rows = []
     with open(csv_path, encoding="utf-8-sig") as f:
         for row in csv.DictReader(f):
@@ -108,11 +118,14 @@ def batch_from_csv(csv_path, out_path=None):
             print(f"MISSING: {img_path}")
             continue
         actual = "HELD" if row.get("actual_held_cup", "").strip() == "True" else "NOT_HELD"
-        verdict, method, ob, bb, raw = detect(img_path)
+        verdict, method, ob, bb, raw = detect(img_path, api_url=api_url)
         correct = (verdict == actual)
-        ok += correct; total += 1
-        if method.startswith("cv_"): cv_count += 1
-        else: qwen_count += 1
+        ok += int(correct)
+        total += 1
+        if method.startswith("cv_"):
+            cv_count += 1
+        else:
+            qwen_count += 1
 
         results.append({
             "image": img_path,
@@ -139,7 +152,7 @@ def batch_from_csv(csv_path, out_path=None):
             "cv_gate_count": cv_count, "qwen_count": qwen_count,
             "results": results
         }
-        with open(out_path, "w") as f:
+        with open(out_path, "w", encoding="utf-8") as f:
             json.dump(report, f, indent=2, ensure_ascii=False)
         print(f"Report saved: {out_path}")
 
@@ -151,13 +164,14 @@ def main():
     p.add_argument("--csv", help="CSV with image paths (label_priority_pack format)")
     p.add_argument("--image", action="append", help="Single image path (repeatable)")
     p.add_argument("--out", help="JSON report output path")
+    p.add_argument("--api-url", default=os.environ.get("QWEN_API_URL", API), help="Local VLM chat-completions endpoint")
     args = p.parse_args()
 
     if args.csv:
-        batch_from_csv(args.csv, args.out)
+        batch_from_csv(args.csv, args.out, api_url=args.api_url)
     elif args.image:
         for img in args.image:
-            verdict, method, ob, bb, raw = detect(img)
+            verdict, method, ob, bb, raw = detect(img, api_url=args.api_url)
             print(f"{verdict} | {method} | orange={int(ob)} blue={int(bb)} | {img}")
     else:
         p.print_help()

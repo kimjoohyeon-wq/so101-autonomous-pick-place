@@ -73,13 +73,23 @@ pip install -r requirements.txt
 ```bash
 python scripts/aux_hybrid_detector.py --image cup_scene.jpg
 # → HELD | cv_held | orange=5230 blue=8198
+
+# 로컬 VLM 서버 주소가 다르면 직접 지정
+python scripts/aux_hybrid_detector.py --image cup_scene.jpg --api-url http://127.0.0.1:8081/v1/chat/completions
 ```
 
 ### 2. 자율 복구 루프
 
 ```bash
-python scripts/autonomous_recovery_loop.py
+python scripts/autonomous_recovery_loop.py --video path/to/recording.mp4 --report-out report.json
 # CV gate monitors → anomaly detected → Gemini analyzes → recovery plan
+```
+
+### 3. 라이브 카메라 모드
+
+```bash
+python scripts/aux_camera_stream.py --camera 1 --out-dir C:\Users\Research\Documents\Robot\live_frames
+python scripts/autonomous_recovery_loop.py --live --frame-dir /mnt/c/Users/Research/Documents/Robot/live_frames
 ```
 
 ### 요구사항

@@ -90,7 +90,7 @@ orange 마커 blob 면적 검출
 │   └── demo.mp4
 ├── reports/                          # 샘플 실행 리포트
 ├── logs/                             # 샘플 JSONL 실행 로그
-└── .github/workflows/lint.yml        # ruff lint (테스트 없음)
+└── .github/workflows/lint.yml        # ruff lint + pytest
 ```
 
 ## 설치
@@ -111,6 +111,9 @@ python scripts/aux_hybrid_detector.py --image cup_scene.jpg
 
 # 배치 모드 (CSV)
 python scripts/aux_hybrid_detector.py --csv labels.csv --out report.json
+
+# 로컬 VLM 서버 주소가 기본값과 다를 때
+python scripts/aux_hybrid_detector.py --image cup_scene.jpg --api-url http://127.0.0.1:8081/v1/chat/completions
 ```
 
 ### 2. 자율 복구 루프 (비디오 파일)
@@ -118,16 +121,19 @@ python scripts/aux_hybrid_detector.py --csv labels.csv --out report.json
 ```bash
 python scripts/autonomous_recovery_loop.py --video path/to/recording.mp4
 # CV gate → anomaly 감지 → Gemini 분석 → 복구 계획 텍스트 → JSON 리포트
+
+# 리포트 저장 위치와 API 키 파일을 직접 지정
+python scripts/autonomous_recovery_loop.py --video path/to/recording.mp4 --report-out report.json --env-path ~/.hermes/.env
 ```
 
 ### 3. 라이브 카메라 모드
 
 ```bash
 # Windows에서 카메라 스트리밍 시작
-python scripts/aux_camera_stream.py
+python scripts/aux_camera_stream.py --camera 1 --out-dir C:\Users\Research\Documents\Robot\live_frames
 
 # WSL에서 실시간 모니터링
-python scripts/autonomous_recovery_loop.py --live --camera 1
+python scripts/autonomous_recovery_loop.py --live --frame-dir /mnt/c/Users/Research/Documents/Robot/live_frames
 ```
 
 ### 요구사항

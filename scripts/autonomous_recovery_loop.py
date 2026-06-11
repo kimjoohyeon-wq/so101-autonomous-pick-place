@@ -13,16 +13,26 @@ Anomalies:
 
 Recovery: CV gate → anomaly detected → Gemini Vision → recovery plan
 """
-import base64, cv2, os, requests, sys, time, json
-from pathlib import Path
+import argparse
+import base64
+import json
+import os
+import tempfile
+import time
 from datetime import datetime
-from collections import deque
 from dataclasses import dataclass, field
+from pathlib import Path
+
+import cv2
+import requests
 
 # ═══════════════════════════════════════════════════════
 # Config
 # ═══════════════════════════════════════════════════════
-VIDEO_PATH = "/mnt/c/Users/Research/Documents/Robot/logs/camera_recordings/camera_recording_20260608_175717_stable_reverse_preclose_v5_override_1_20260608_dual_motion_dual.mp4"
+DEFAULT_VIDEO_PATH = os.environ.get(
+    "SO101_VIDEO_PATH",
+    "/mnt/c/Users/Research/Documents/Robot/logs/camera_recordings/camera_recording_20260608_175717_stable_reverse_preclose_v5_override_1_20260608_dual_motion_dual.mp4",
+)
 OPENROUTER_MODEL = "google/gemini-2.5-flash"
 FRAME_STEP = 5
 DEBOUNCE_FRAMES = 3        # consecutive frames to confirm state change
@@ -59,9 +69,16 @@ def cv_detect(hsv_frame):
 # ═══════════════════════════════════════════════════════
 # Gemini Recovery
 # ═══════════════════════════════════════════════════════
-def get_env_key(name):
-    env_path = os.path.expanduser("~/.hermes/.env")
-    with open(env_path) as f:
+def get_env_key(name, env_path=None):
+    value = os.environ.get(name)
+    if value:
+        return value
+
+    env_path = Path(env_path or "~/.hermes/.env").expanduser()
+    if not env_path.exists():
+        return None
+
+    with open(env_path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if "=" in line:
@@ -70,15 +87,15 @@ def get_env_key(name):
                     return v.strip().strip('"').strip("'")
     return None
 
-def ask_gemini(image_bgr, anomaly_type, context):
-    api_key = get_env_key("OPENROUTER_API_KEY")
+def ask_gemini(image_bgr, anomaly_type, context, env_path=None, model=OPENROUTER_MODEL):
+    api_key = get_env_key("OPENROUTER_API_KEY", env_path=env_path)
     if not api_key:
         return "ERROR: No API key"
-    
-    tmp_path = "/tmp/anomaly_frame.jpg"
-    cv2.imwrite(tmp_path, image_bgr)
-    with open(tmp_path, "rb") as f:
-        img_b64 = base64.b64encode(f.read()).decode()
+
+    ok, encoded = cv2.imencode(".jpg", image_bgr)
+    if not ok:
+        return "ERROR: Could not encode anomaly frame"
+    img_b64 = base64.b64encode(encoded.tobytes()).decode()
     
     prompt = f"""Robot wrist camera. Orange tape = cup marker. Yellow/pink = gripper tips.
 
@@ -95,7 +112,7 @@ Concise. Korean or English."""
         "https://openrouter.ai/api/v1/chat/completions",
         headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
         json={
-            "model": OPENROUTER_MODEL,
+            "model": model,
             "messages": [{"role": "user", "content": [
                 {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_b64}"}},
                 {"type": "text", "text": prompt}
@@ -214,9 +231,10 @@ class PickPlaceMonitor:
 LIVE_FRAME_DIR = "/mnt/c/Users/Research/Documents/Robot/live_frames"
 LIVE_FRAME_FILE = "aux_latest.jpg"
 
-def live_frame_reader(frame_dir=LIVE_FRAME_DIR):
+
+def live_frame_reader(frame_dir=LIVE_FRAME_DIR, frame_file=LIVE_FRAME_FILE):
     """Generator: yield (frame, frame_idx) from live frame directory."""
-    frame_path = Path(frame_dir) / LIVE_FRAME_FILE
+    frame_path = Path(frame_dir) / frame_file
     idx = 0
     last_mtime = 0
     while True:
@@ -234,14 +252,27 @@ def live_frame_reader(frame_dir=LIVE_FRAME_DIR):
 # ═══════════════════════════════════════════════════════
 # Main Loop
 # ═══════════════════════════════════════════════════════
-def main(video_path=VIDEO_PATH, use_camera=False, camera_id=1):
+def main(
+    video_path=DEFAULT_VIDEO_PATH,
+    use_camera=False,
+    camera_id=1,
+    frame_dir=LIVE_FRAME_DIR,
+    frame_file=LIVE_FRAME_FILE,
+    report_out=None,
+    env_path=None,
+    openrouter_model=OPENROUTER_MODEL,
+):
     if use_camera:
         # Live mode: read from Windows Python stream
-        frame_iter = live_frame_reader()
+        frame_iter = live_frame_reader(frame_dir=frame_dir, frame_file=frame_file)
         total = float('inf')
         fps = 8.0
     else:
+        if not video_path:
+            raise ValueError("video_path is required unless --live is used")
         cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            raise FileNotFoundError(f"Could not open video: {video_path}")
         total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         fps = cap.get(cv2.CAP_PROP_FPS)
     
@@ -287,8 +318,13 @@ def main(video_path=VIDEO_PATH, use_camera=False, camera_id=1):
             if is_anomaly and gemini_calls < max_gemini_calls:
                 gemini_calls += 1
                 print(f"         → Gemini recovery #{gemini_calls}...")
-                recovery = ask_gemini(aux, event, 
-                    f"State was {monitor.state}, held={monitor.held_frames} not_held={monitor.not_held_frames}")
+                recovery = ask_gemini(
+                    aux,
+                    event,
+                    f"State was {monitor.state}, held={monitor.held_frames} not_held={monitor.not_held_frames}",
+                    env_path=env_path,
+                    model=openrouter_model,
+                )
                 recovery_plans.append({"frame": frame_idx, "event": event, "plan": recovery})
                 print(f"         → {recovery[:150]}...")
                 print()
@@ -324,17 +360,30 @@ def main(video_path=VIDEO_PATH, use_camera=False, camera_id=1):
         "anomalies": monitor.anomalies,
         "recovery_plans": recovery_plans,
     }
-    out_path = "/tmp/autonomous_recovery_v2_report.json"
-    with open(out_path, "w") as f:
+    out_path = Path(report_out or Path(tempfile.gettempdir()) / "autonomous_recovery_v2_report.json")
+    with open(out_path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2, ensure_ascii=False)
     print(f"\nReport: {out_path}")
 
 
 if __name__ == "__main__":
-    import argparse
     p = argparse.ArgumentParser()
-    p.add_argument("--video", default=VIDEO_PATH)
+    p.add_argument("--video", default=DEFAULT_VIDEO_PATH)
     p.add_argument("--camera", type=int, default=0, help="Camera device ID (0=default)")
     p.add_argument("--live", action="store_true", help="Use live camera instead of video")
+    p.add_argument("--frame-dir", default=LIVE_FRAME_DIR, help="Directory containing live camera frames")
+    p.add_argument("--frame-file", default=LIVE_FRAME_FILE, help="Live frame filename")
+    p.add_argument("--report-out", help="JSON report output path")
+    p.add_argument("--env-path", help="Optional .env path for OPENROUTER_API_KEY")
+    p.add_argument("--openrouter-model", default=OPENROUTER_MODEL, help="OpenRouter vision model")
     args = p.parse_args()
-    main(video_path=args.video, use_camera=args.live, camera_id=args.camera)
+    main(
+        video_path=args.video,
+        use_camera=args.live,
+        camera_id=args.camera,
+        frame_dir=args.frame_dir,
+        frame_file=args.frame_file,
+        report_out=args.report_out,
+        env_path=args.env_path,
+        openrouter_model=args.openrouter_model,
+    )
