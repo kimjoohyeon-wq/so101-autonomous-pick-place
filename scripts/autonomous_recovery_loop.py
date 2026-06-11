@@ -13,10 +13,14 @@ Anomalies:
 
 Recovery: CV gate → anomaly detected → Gemini Vision → recovery plan
 """
-import base64, cv2, os, requests, sys, time, json
+import base64
+import cv2
+import os
+import requests
+import time
+import json
 from pathlib import Path
 from datetime import datetime
-from collections import deque
 from dataclasses import dataclass, field
 
 # ═══════════════════════════════════════════════════════

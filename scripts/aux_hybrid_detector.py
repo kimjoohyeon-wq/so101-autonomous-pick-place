@@ -14,11 +14,17 @@ Pipeline (CV-confident fast path, Qwen only for genuinely ambiguous):
 """
 from __future__ import annotations
 
-import argparse, base64, csv, json, os, sys, time
+import argparse
+import base64
+import csv
+import json
+import os
 from datetime import datetime
 from pathlib import Path
 
-import cv2, numpy as np, requests
+import cv2
+import numpy as np
+import requests
 
 API = "http://127.0.0.1:8081/v1/chat/completions"
 ORANGE_LOWER = np.array([10, 100, 100])
@@ -110,9 +116,12 @@ def batch_from_csv(csv_path, out_path=None):
         actual = "HELD" if row.get("actual_held_cup", "").strip() == "True" else "NOT_HELD"
         verdict, method, ob, bb, raw = detect(img_path)
         correct = (verdict == actual)
-        ok += correct; total += 1
-        if method.startswith("cv_"): cv_count += 1
-        else: qwen_count += 1
+        ok += 1 if correct else 0
+        total += 1
+        if method.startswith("cv_"):
+            cv_count += 1
+        else:
+            qwen_count += 1
 
         results.append({
             "image": img_path,

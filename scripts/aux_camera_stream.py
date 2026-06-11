@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT
 """Windows-side: capture aux camera frames to shared dir for WSL monitor."""
-import cv2, time, os, sys
+import cv2
+import time
+import sys
 from pathlib import Path
 
 CAMERA_ID = 1  # aux camera
